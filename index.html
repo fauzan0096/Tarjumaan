@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#7a2e4a">
+<title>Hum Tum</title>
+<style>
+:root{
+  --bg:#fdf6f3;--card:#ffffff;--ink:#2b1d24;--muted:#7d6b73;--accent:#a63d62;--accent2:#7a2e4a;
+  --line:#efe0e0;--ok:#2f8f5b;--danger:#c0392b;--me:#f6d9e3;--them:#eef0f6;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#1c1418;--card:#291d23;--ink:#f6e9ee;--muted:#b49ba5;--accent:#e0698f;--accent2:#c9507a;--line:#3b2a33;--me:#5a2a3c;--them:#33262d;}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+body{min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 100px}
+h1{font-size:28px;margin:8px 0 2px;color:var(--accent2)}
+h2{font-size:20px;margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+input,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+textarea{min-height:90px;resize:vertical}
+button{font:inherit;border:0;border-radius:12px;padding:10px 16px;background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+button.danger{background:var(--danger)}
+button.small{padding:6px 10px;font-size:14px}
+button:disabled{opacity:.55}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.between{justify-content:space-between}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;background:transparent;color:var(--muted);border-radius:0;padding:10px 2px;font-size:12px}
+nav button.on{color:var(--accent);font-weight:600}
+nav button span{display:block;font-size:20px}
+.entry{border-top:1px solid var(--line);padding:12px 0}
+.entry:first-child{border-top:0}
+.entry p{margin:0 0 6px;white-space:pre-wrap;word-break:break-word}
+.meta{font-size:12px;color:var(--muted)}
+.done p{text-decoration:line-through;color:var(--muted)}
+.msg{padding:10px 12px;border-radius:12px;margin:10px 0;font-size:14px}
+.msg.err{background:#fdecea;color:#8a1f14}
+.msg.ok{background:#e6f5ec;color:#1d5c3a}
+.big{font-size:18px}
+.hidden{display:none}
+.seg{display:flex;gap:6px;margin:8px 0;overflow-x:auto}
+.seg button{background:var(--card);color:var(--muted);border:1px solid var(--line);padding:8px 12px;white-space:nowrap}
+.seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.netbar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:#aaa;flex:none}
+.dot.on{background:var(--ok)}.dot.wait{background:#e0a100}
+.pings{display:flex;gap:8px;margin:6px 0}
+.pings button{background:var(--card);border:1px solid var(--line);font-size:22px;padding:6px 14px}
+.code{font-size:26px;letter-spacing:3px;font-weight:700;text-align:center;margin:8px 0;word-break:break-all}
+.chat{display:flex;flex-direction:column;gap:6px;max-height:48vh;overflow-y:auto;padding:4px}
+.chat:empty::before{content:"Say salam \1F44B";color:var(--muted)}
+.b{max-width:80%;padding:8px 12px;border-radius:16px;white-space:pre-wrap;word-break:break-word}
+.b small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+.b.me{align-self:flex-end;background:var(--me);border-bottom-right-radius:4px}
+.b.them{align-self:flex-start;background:var(--them);border-bottom-left-radius:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.gcard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--card);color:var(--ink);border:1px solid var(--line);padding:14px;text-align:left}
+.gcard .em{font-size:28px}
+.gcard small{color:var(--muted)}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:320px;margin:12px auto}
+.cell{aspect-ratio:1;font-size:38px;background:var(--bg);border:1px solid var(--line);color:var(--ink);padding:0}
+.c4{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:360px;margin:12px auto;background:#2f4fa8;padding:6px;border-radius:12px}
+.c4cell{aspect-ratio:1;border-radius:50%;background:#fff;border:0;padding:0}
+.c4cell.R{background:#e53935}.c4cell.Y{background:#fdd835}
+.opt{display:block;width:100%;margin:8px 0;padding:14px;font-size:17px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:#2b1d24;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:20;max-width:90%;text-align:center}
+.rit{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.rit:first-of-type{border-top:0}
+.rit .t{flex:1}
+.tick{width:34px;height:34px;border-radius:50%;padding:0;background:transparent;border:2px solid var(--accent);color:#fff}
+.tick.on{background:var(--ok);border-color:var(--ok)}
+</style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<nav id="nav" class="hidden"></nav>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(function(){
+'use strict';
+
+const LS_KEY='humtum_vault_v1';
+const ITER=600000;
+const enc=new TextEncoder(), dec=new TextDecoder();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const b64=buf=>{const b=new Uint8Array(buf);let s='';for(let i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s);};
+const unb64=s=>{const bin=atob(s),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a;};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const num=x=>{x=parseInt(x,10);return (x>=0&&x<100000)?x:0;};
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const todayKey=()=>dateKey(new Date());
+function dayIndex(){const n=new Date(),s=new Date(n.getFullYear(),0,0);return Math.floor((n-s)/864e5);}
+function fmt(ts){try{return new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}catch(e){return '';}}
+function fmtTime(ts){try{return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function range(n){const r=[];for(let i=0;i<n;i++)r.push(i);return r;}
+
+// ---------- content ----------
+const PROMPTS=[
+ "What is one small thing I did recently that made you smile?",
+ "What is your favourite memory of the two of us so far?",
+ "What is one dua you make for us?",
+ "What is something you want us to learn together this year?",
+ "When do you feel most understood by me?",
+ "What is one habit of mine you secretly love?",
+ "Where would you like us to travel together, and why?",
+ "What was the best meal we ever shared?",
+ "What is one thing you are worried about that I can help with?",
+ "What is a tiny ritual we could start every week?",
+ "What did you notice about me today that you appreciated?",
+ "If we had a free whole day, how would you spend it?",
+ "What is one thing you are proud of me for?",
+ "What is a dream you have not told me about yet?",
+ "What makes our home feel like home to you?",
+ "What is something I do that makes you feel cared for?",
+ "What is one thing we can do better as a team?",
+ "What was the funniest moment we have had together?",
+ "What would you like us to be doing five years from now?",
+ "What is the kindest thing someone did for us recently?",
+ "What do you need more of from me this week?"
+];
+const CHALLENGES=[
+ "Send a voice note saying one thing you admire about them.",
+ "Make a dua for them in sujood tonight and tell them about it.",
+ "Cook or order their favourite meal today.",
+ "Put your phones away for 30 minutes and just talk.",
+ "Write three things you are grateful for about them.",
+ "Take a short walk together after Maghrib.",
+ "Do one of their chores without being asked.",
+ "Leave a small handwritten note where they will find it.",
+ "Share a memory from before you met that shaped you.",
+ "Ask them: how can I support you this week? Then listen.",
+ "Recite a few ayahs of the Quran together.",
+ "Plan one small surprise for the weekend.",
+ "Look through old photos together and laugh.",
+ "Thank them for something they usually do without being thanked."
+];
+const TT_CARDS=[
+ ["Tea","Coffee"],["Biryani","Pizza"],["Mountains","Beach"],["Early riser","Night owl"],["Sweet","Salty"],
+ ["Travel","Stay home"],["Text","Call"],["Summer","Winter"],["Rain","Sunshine"],["Books","Movies"],
+ ["Home-cooked food","Restaurant"],["Surprise gift","Planned gift"],["Long drive","Long walk"],["Mango","Chocolate"],
+ ["Plan everything","Go with the flow"],["City life","Village life"],["Save money","Spend on experiences"],
+ ["Ice cream","Hot chai"],["Photos","Videos"],["Quiet evening","Family gathering"],["Handwritten note","Voice note"],
+ ["Old songs","New songs"],["Cook together","Order in"],["Umrah trip","Mountain trip"]
+];
+const NHIE_CARDS=[
+ "stayed up all night talking to someone","forgotten an important date","cried while watching a movie",
+ "burnt the food while cooking","missed a call and pretended I did not see it","laughed at the wrong moment",
+ "fallen asleep during a conversation","got lost while travelling","kept a gift I never used",
+ "sung loudly when I thought no one was listening","forgotten where my phone was while holding it",
+ "eaten someone else's food by mistake","planned a surprise that got spoiled","practised a conversation in the mirror",
+ "slept through an alarm for something important","tried to learn a new skill and quit in a week",
+ "taken a photo of food before eating","been scared of a tiny insect"
+];
+const YOM_CARDS=[
+ "Who is more likely to forget where the keys are?","Who is more likely to cry at a sad scene?","Who falls asleep first?",
+ "Who is more likely to start a silly argument?","Who is the better cook?","Who is more likely to be late?",
+ "Who says sorry first?","Who is more romantic?","Who spends more time on the phone?",
+ "Who is more likely to plan a surprise?","Who is more stubborn?","Who is more likely to get lost?",
+ "Who remembers dates better?","Who will wake up first for Fajr?","Who is funnier?","Who is more likely to overpack?",
+ "Who is the bigger foodie?","Who gets angry faster?","Who is calmer in a crisis?","Who is more likely to buy something unplanned?"
+];
+const TRUTHS=[
+ "What is the first thing you noticed about me?","What is one thing you were nervous to tell me?",
+ "What is your happiest memory of us?","What is something I do that you secretly find funny?",
+ "What is one thing you wish we did more often?","What is your biggest dream for our future?",
+ "What is a small thing I do that melts your heart?","When did you first feel close to me?",
+ "What is one thing you are afraid to lose?","What is something you want to learn from me?",
+ "What is a habit of yours you want to fix?","What do you miss most when we are apart?",
+ "What is one thing you are proud of in our relationship?"
+];
+const DARES=[
+ "Say three things you love about your partner in 30 seconds.","Send your partner a voice note in a funny voice.",
+ "Make a dua for your partner out loud.","Draw your partner in 30 seconds and show them.",
+ "Describe your partner using only emojis.","Do an impression of your partner.",
+ "Tell a joke and make your partner laugh.","Sing one line of any song you like.",
+ "Write a two-line poem for your partner.","Share a harmless embarrassing story.",
+ "Say something sweet in a language you rarely use.","Share a photo that makes you smile and explain why."
+];
+const DECKS={
+ tt:{type:'choice',cards:TT_CARDS},
+ guess:{type:'guess',cards:TT_CARDS},
+ nhie:{type:'choice',cards:NHIE_CARDS},
+ yom:{type:'yom',cards:YOM_CARDS},
+ deep:{type:'text',cards:PROMPTS}
+};
+const GAMES=[
+ {id:'ttt',emoji:'\u274C',title:'Tic-Tac-Toe',desc:'Classic, live.'},
+ {id:'c4',emoji:'\uD83D\uDD34',title:'Connect Four',desc:'Drop and connect 4.'},
+ {id:'tt',emoji:'\u2696\uFE0F',title:'This or That',desc:'Pick, then reveal together.'},
+ {id:'guess',emoji:'\uD83E\uDDE0',title:'Guess my pick',desc:'How well do you know me?'},
+ {id:'nhie',emoji:'\uD83D\uDE48',title:'Never Have I Ever',desc:'Clean and funny.'},
+ {id:'yom',emoji:'\uD83D\uDC49',title:'You or Me',desc:'Who is more likely?'},
+ {id:'deep',emoji:'\uD83D\uDCAC',title:'Deep talk',desc:'Answer, then reveal.'},
+ {id:'tod',emoji:'\uD83C\uDFB2',title:'Truth or Dare',desc:'Sweet and halal.'}
+];
+const GTITLE={};GAMES.forEach(g=>GTITLE[g.id]=g.title);
+const PINGS=['\uD83D\uDC97','\uD83D\uDE18','\uD83E\uDD32','\uD83E\uDD17'];
+
+const TABS=[['today','\u2728','Today'],['together','\uD83D\uDC9E','Together'],['journal','\uD83D\uDCD6','Journal'],['vault','\uD83D\uDD12','Vault']];
+const COLLECTIONS={
+ notes:{title:'Notes',hint:'Write something sweet for each other.',ph:'Write a note...'},
+ memories:{title:'Memories',hint:'Moments you never want to forget.',ph:'Describe the memory...',date:true},
+ gratitude:{title:'Thanks',hint:'What are you thankful for today?',ph:'I am grateful for...'},
+ plans:{title:'Plans',hint:'Dreams and goals, tick when done.',ph:'Our plan or goal...',check:true}
+};
+
+// ---------- state ----------
+const state={key:null,salt:null,iter:ITER,data:null,tab:'today',jsub:'notes',tsub:'chat',msg:null,game:null,gtmp:null,draft:'',chatDraft:'',roomHint:'',hid:0};
+const net={peer:null,conn:null,role:null,status:'idle',code:'',partnerName:'',err:'',autoTried:false};
+
+function emptyData(){
+  return {notes:[],memories:[],gratitude:[],plans:[],done:{},
+    rituals:[{id:uid(),text:'Say salam and good morning',days:{}},{id:uid()+'b',text:'Make dua for each other',days:{}},{id:uid()+'c',text:'Share one thing you are grateful for',days:{}}],
+    chat:[],me:'',partner:'',room:''};
+}
+function setMsg(text,type){state.msg=text?{text:text,type:type||'err'}:null;}
+function msgHtml(){return state.msg?`<div class="msg ${state.msg.type}">${esc(state.msg.text)}</div>`:'';}
+let toastT=null;
+function toast(t){const el=$('toast');el.textContent=t;el.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.add('hidden'),3000);}
+
+// ---------- crypto ----------
+async function deriveKey(pass,salt,iter){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function persist(){
+  if(!state.key||!state.data)return;
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},state.key,enc.encode(JSON.stringify(state.data)));
+  localStorage.setItem(LS_KEY,JSON.stringify({v:1,iter:state.iter,salt:b64(state.salt),iv:b64(iv),ct:b64(ct)}));
+}
+async function decryptRecord(rec,pass){
+  const salt=unb64(rec.salt);
+  const key=await deriveKey(pass,salt,rec.iter);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(rec.iv)},key,unb64(rec.ct));
+  return {key:key,salt:salt,iter:rec.iter,data:Object.assign(emptyData(),JSON.parse(dec.decode(pt)))};
+}
+async function createVault(pass){
+  state.salt=crypto.getRandomValues(new Uint8Array(16));
+  state.iter=ITER;
+  state.key=await deriveKey(pass,state.salt,state.iter);
+  state.data=emptyData();
+  await persist();
+}
+function validRecord(r){
+  return r&&r.v===1&&typeof r.salt==='string'&&typeof r.iv==='string'&&typeof r.ct==='string'&&typeof r.iter==='number'&&r.iter>=100000&&r.iter<=2000000;
+}
+function getRecord(){try{const r=JSON.parse(localStorage.getItem(LS_KEY));return validRecord(r)?r:null;}catch(e){return null;}}
+function lock(){netClose();net.autoTried=false;net.partnerName='';state.key=null;state.data=null;state.tab='today';state.game=null;render();}
+
+// ---------- networking ----------
+const myName=()=>(state.data&&state.data.me)||'Me';
+const pname=()=>net.partnerName||(state.data&&state.data.partner)||'Partner';
+const nameOf=r=>r===net.role?myName():pname();
+const otherRole=()=>net.role==='host'?'guest':'host';
+const connected=()=>net.status==='connected'&&net.conn&&net.conn.open;
+function cleanName(n){return String(n||'').replace(/[\u0000-\u001f]/g,'').trim().slice(0,30);}
+function genCode(){
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(10));let s='';
+  for(let i=0;i<10;i++)s+=A[r[i]%A.length];return s;
+}
+function normCode(c){return String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+function formatCode(c){c=normCode(c);return c.length>5?c.slice(0,5)+'-'+c.slice(5):c;}
+const pid=()=>'humtum-'+net.code.toLowerCase();
+
+function netClose(){
+  const c=net.conn,p=net.peer;
+  net.conn=null;net.peer=null;net.role=null;net.status='idle';net.err='';state.game=null;state.gtmp=null;
+  try{if(c)c.close();}catch(e){}
+  try{if(p)p.destroy();}catch(e){}
+}
+function netConnect(raw){
+  const code=normCode(raw);
+  if(code.length<8){net.err='Room code kam se kam 8 characters ka hona chahiye.';net.status='idle';netChanged();return;}
+  if(!window.Peer){net.err='Online part ke liye internet chahiye (PeerJS load nahi hua).';net.status='idle';netChanged();return;}
+  netClose();
+  net.code=code;net.status='connecting';
+  state.data.room=code;persist();
+  tryHost();
+  netChanged();
+}
+function tryHost(){
+  let p;
+  try{p=new Peer(pid());}catch(e){net.status='idle';net.err='Connection start nahi hua.';netChanged();return;}
+  net.peer=p;net.role='host';
+  p.on('open',()=>{if(net.peer!==p)return;net.status='waiting';netChanged();});
+  p.on('connection',c=>{
+    if(net.peer!==p)return;
+    if(net.conn&&net.conn.open){c.on('open',()=>{try{c.close();}catch(e){}});return;}
+    wire(c);
+  });
+  p.on('disconnected',()=>{try{p.reconnect();}catch(e){}});
+  p.on('error',err=>{
+    if(net.peer!==p)return;
+    if(err.type==='unavailable-id'){net.peer=null;try{p.destroy();}catch(e){}joinGuest();}
+    else{net.status='idle';net.err='Connection error: '+(err.type||'unknown');netChanged();}
+  });
+}
+function joinGuest(){
+  const p=new Peer();
+  net.peer=p;net.role='guest';
+  p.on('open',()=>{if(net.peer!==p)return;wire(p.connect(pid(),{reliable:true}));});
+  p.on('disconnected',()=>{try{p.reconnect();}catch(e){}});
+  p.on('error',err=>{
+    if(net.peer!==p)return;
+    net.status='idle';
+    net.err=err.type==='peer-unavailable'?'Partner abhi room mein nahi hai. Dono ek saath app kholein aur dobara try karein.':'Connection error: '+(err.type||'unknown');
+    netChanged();
+  });
+}
+function wire(c){
+  c.on('open',()=>{
+    if(net.conn&&net.conn!==c&&net.conn.open){try{c.close();}catch(e){}return;}
+    net.conn=c;net.status='connected';net.err='';state.game=null;state.gtmp=null;
+    sendMsg({t:'hello',name:myName()==='Me'?'':myName()});
+    netChanged();
+  });
+  c.on('data',m=>{if(net.conn===c&&state.data)onData(m);});
+  c.on('close',()=>{
+    if(net.conn===c){
+      net.conn=null;state.game=null;state.gtmp=null;
+      if(net.role==='host'){net.status='waiting';net.err='';}else{net.status='idle';net.err='Partner disconnect ho gaye.';}
+      netChanged();
+    }
+  });
+  c.on('error',()=>{});
+}
+function sendMsg(o){if(net.conn&&net.conn.open){try{net.conn.send(o);}catch(e){}}}
+
+function cleanAns(id,v){
+  const dk=DECKS[id];if(!dk||v===null||v===undefined)return null;
+  if(dk.type==='choice')return (v===0||v===1)?v:null;
+  if(dk.type==='yom')return (v==='host'||v==='guest')?v:null;
+  if(dk.type==='text')return (typeof v==='string'&&v.trim())?v.slice(0,500):null;
+  if(dk.type==='guess'){if(v&&(v.own===0||v.own===1)&&(v.guess===0||v.guess===1))return {own:v.own,guess:v.guess};return null;}
+  return null;
+}
+function cleanGame(g){
+  if(!g||typeof g!=='object')return null;
+  const id=g.id;
+  if(id==='ttt'){
+    if(!Array.isArray(g.board)||g.board.length!==9)return null;
+    const w=g.wins||{};
+    return {id:id,board:g.board.map(c=>(c==='X'||c==='O')?c:''),turn:g.turn==='O'?'O':'X',
+      winner:(g.winner==='X'||g.winner==='O'||g.winner==='draw')?g.winner:null,starter:g.starter==='O'?'O':'X',wins:{X:num(w.X),O:num(w.O)}};
+  }
+  if(id==='c4'){
+    if(!Array.isArray(g.grid)||g.grid.length!==42)return null;
+    const w=g.wins||{};
+    return {id:id,grid:g.grid.map(c=>(c==='R'||c==='Y')?c:''),turn:g.turn==='Y'?'Y':'R',
+      winner:(g.winner==='R'||g.winner==='Y'||g.winner==='draw')?g.winner:null,starter:g.starter==='Y'?'Y':'R',wins:{R:num(w.R),Y:num(w.Y)}};
+  }
+  if(id==='tod'){
+    const kind=(g.kind==='truth'||g.kind==='dare')?g.kind:null;
+    let i=parseInt(g.i,10)||0;const len=kind==='dare'?DARES.length:TRUTHS.length;if(i<0||i>=len)i=0;
+    return {id:id,kind:kind,i:i};
+  }
+  const dk=DECKS[id];
+  if(dk){
+    const n=dk.cards.length;
+    if(!Array.isArray(g.order)||g.order.length!==n)return null;
+    const order=g.order.map(x=>{x=parseInt(x,10);return (x>=0&&x<n)?x:0;});
+    let pos=parseInt(g.pos,10)||0;if(pos<0||pos>=n)pos=0;
+    const a=g.ans||{},s=g.score||{};
+    return {id:id,order:order,pos:pos,ans:{host:cleanAns(id,a.host),guest:cleanAns(id,a.guest)},score:{host:num(s.host),guest:num(s.guest)}};
+  }
+  return null;
+}
+function onData(m){
+  if(!m||typeof m!=='object')return;
+  const d=state.data;
+  if(m.t==='hello'){
+    net.partnerName=cleanName(m.name);
+    if(net.partnerName&&d.partner!==net.partnerName){d.partner=net.partnerName;persist();}
+    netChanged();
+  }else if(m.t==='chat'){
+    const txt=String(m.text||'').slice(0,2000);if(txt)addChat('them',txt);
+  }else if(m.t==='ping'){
+    toast(pname()+' sent '+(PINGS.indexOf(m.e)>-1?m.e:PINGS[0]));
+  }else if(m.t==='gs'){
+    const g=cleanGame(m.g);if(g){state.game=g;state.gtmp=null;state.draft='';gameChanged();}
+  }else if(m.t==='ans'){
+    const g=state.game;
+    if(!g||!DECKS[g.id]||m.pos!==g.pos)return;
+    const v=cleanAns(g.id,m.val);if(v===null)return;
+    g.ans[otherRole()]=v;gameChanged();
+  }else if(m.t==='next'){
+    const g=state.game;
+    if(g&&DECKS[g.id]&&m.pos===g.pos&&g.ans.host!==null&&g.ans.guest!==null)nextRound();
+  }else if(m.t==='gc'){
+    state.game=null;state.gtmp=null;gameChanged();
+  }
+}
+
+// ---------- chat ----------
+function bubble(m){return `<div class="b ${m.f==='me'?'me':'them'}">${esc(m.x)}<small>${esc(fmtTime(m.ts))}</small></div>`;}
+function addChat(from,text){
+  const d=state.data;
+  d.chat.push({f:from,x:text,ts:Date.now()});
+  if(d.chat.length>300)d.chat=d.chat.slice(-300);
+  persist();
+  if(state.tab==='together'&&state.tsub==='chat'){
+    const l=$('chatlist');
+    if(l){l.insertAdjacentHTML('beforeend',bubble(d.chat[d.chat.length-1]));l.scrollTop=l.scrollHeight;}
+  }else if(from==='them')toast(pname()+': '+text.slice(0,60));
+}
+function scrollChat(){const l=$('chatlist');if(l)l.scrollTop=l.scrollHeight;}
+
+// ---------- games ----------
+const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function setGame(g){state.game=g;state.gtmp=null;state.draft='';sendMsg({t:'gs',g:g});gameChanged();}
+function startGame(id){
+  if(!connected())return;
+  if(id==='ttt')setGame({id:'ttt',board:Array(9).fill(''),turn:'X',winner:null,starter:'X',wins:{X:0,O:0}});
+  else if(id==='c4')setGame({id:'c4',grid:Array(42).fill(''),turn:'R',winner:null,starter:'R',wins:{R:0,Y:0}});
+  else if(id==='tod')setGame({id:'tod',kind:null,i:0});
+  else if(DECKS[id])setGame({id:id,order:shuffle(range(DECKS[id].cards.length)),pos:0,ans:{host:null,guest:null},score:{host:0,guest:0}});
+}
+function tttMove(i){
+  const g=state.game;if(!g||g.id!=='ttt'||g.winner||g.board[i])return;
+  const mark=net.role==='host'?'X':'O';if(g.turn!==mark)return;
+  g.board[i]=mark;
+  let w=null;LINES.forEach(l=>{if(g.board[l[0]]&&g.board[l[0]]===g.board[l[1]]&&g.board[l[1]]===g.board[l[2]])w=g.board[l[0]];});
+  if(w){g.winner=w;g.wins[w]++;}else if(g.board.every(Boolean))g.winner='draw';else g.turn=mark==='X'?'O':'X';
+  setGame(g);
+}
+function tttAgain(){
+  const g=state.game;if(!g||g.id!=='ttt')return;
+  const s=g.starter==='X'?'O':'X';
+  setGame({id:'ttt',board:Array(9).fill(''),turn:s,winner:null,starter:s,wins:g.wins});
+}
+function c4win(grid,r,c,m){
+  const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let k=0;k<4;k++){
+    let n=1;
+    for(let s=-1;s<=1;s+=2){
+      let rr=r+dirs[k][0]*s,cc=c+dirs[k][1]*s;
+      while(rr>=0&&rr<6&&cc>=0&&cc<7&&grid[rr*7+cc]===m){n++;rr+=dirs[k][0]*s;cc+=dirs[k][1]*s;}
+    }
+    if(n>=4)return true;
+  }
+  return false;
+}
+function c4Drop(c){
+  const g=state.game;if(!g||g.id!=='c4'||g.winner)return;
+  const mark=net.role==='host'?'R':'Y';if(g.turn!==mark)return;
+  let r=-1;for(let i=5;i>=0;i--){if(!g.grid[i*7+c]){r=i;break;}}
+  if(r<0)return;
+  g.grid[r*7+c]=mark;
+  if(c4win(g.grid,r,c,mark)){g.winner=mark;g.wins[mark]++;}
+  else if(g.grid.every(Boolean))g.winner='draw';
+  else g.turn=mark==='R'?'Y':'R';
+  setGame(g);
+}
+function c4Again(){
+  const g=state.game;if(!g||g.id!=='c4')return;
+  const s=g.starter==='R'?'Y':'R';
+  setGame({id:'c4',grid:Array(42).fill(''),turn:s,winner:null,starter:s,wins:g.wins});
+}
+function answer(v){
+  const g=state.game;if(!g||!DECKS[g.id]||g.ans[net.role]!==null)return;
+  g.ans[net.role]=v;
+  sendMsg({t:'ans',pos:g.pos,val:v});
+  gameChanged();
+}
+function nextRound(){
+  const g=state.game;if(!g||!DECKS[g.id])return;
+  if(g.id==='guess'&&g.ans.host&&g.ans.guest){
+    if(g.ans.host.guess===g.ans.guest.own)g.score.host++;
+    if(g.ans.guest.guess===g.ans.host.own)g.score.guest++;
+  }
+  g.pos=(g.pos+1)%g.order.length;
+  g.ans={host:null,guest:null};
+  state.gtmp=null;state.draft='';
+  gameChanged();
+}
+function gameChanged(){if(state.tab==='together')updateContent();}
+
+// ---------- views ----------
+function lockView(){
+  const rec=getRecord(),el=$('app');
+  $('nav').classList.add('hidden');
+  if(!window.crypto||!crypto.subtle){
+    el.innerHTML='<h1>Hum Tum</h1><div class="msg err">Encryption ke liye HTTPS chahiye. Page ko https:// se kholein.</div>';
+    return;
+  }
+  if(rec){
+    el.innerHTML=`<h1>Hum Tum \uD83D\uDC9E</h1><p class="sub">Your private space. Enter your passphrase to unlock.</p>
+      <div class="card"><form id="f-unlock"><label for="p1">Passphrase</label>
+      <input id="p1" type="password" autocomplete="current-password" required>${msgHtml()}
+      <div class="row" style="margin-top:12px"><button type="submit" id="b-unlock">Unlock</button></div></form></div>
+      <p class="meta">Passphrase bhool gaye? Recovery nahi hai (privacy ke liye). Aap <a href="#" id="a-reset">vault erase</a> karke naya bana sakte hain ya backup restore kar sakte hain.</p>`;
+  }else{
+    el.innerHTML=`<h1>Hum Tum \uD83D\uDC9E</h1><p class="sub">Apna passphrase banayein. Sab kuch is device par encrypted rehta hai. Aapka partner apne phone par apna alag passphrase bana sakta hai.</p>
+      <div class="card"><form id="f-create"><label for="p1">New passphrase</label>
+      <input id="p1" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="p2">Repeat passphrase</label><input id="p2" type="password" autocomplete="new-password" minlength="8" required>${msgHtml()}
+      <p class="meta">Kam se kam 8 characters. Bhool gaye to data wapas nahi aayega.</p>
+      <div class="row"><button type="submit" id="b-create">Create vault</button></div></form></div>
+      <div class="card"><h2>Backup hai?</h2><p class="meta">Encrypted backup file chunein.</p><input type="file" id="f-import" accept="application/json,.json"></div>`;
+  }
+  setMsg(null);
+}
+
+function streak(r){
+  const d=new Date();let n=0;
+  if(!r.days[dateKey(d)])d.setDate(d.getDate()-1);
+  while(r.days[dateKey(d)]){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+function todayView(){
+  const d=state.data,key=todayKey(),idx=dayIndex();
+  const prompt=PROMPTS[idx%PROMPTS.length],ch=CHALLENGES[idx%CHALLENGES.length];
+  const done=!!d.done[key],total=Object.keys(d.done).length;
+  const ps=connected()?`\uD83D\uDC9E Connected with ${esc(pname())}`:'\u26AA Partner offline. Together tab mein connect karein.';
+  const rits=d.rituals.map(r=>{
+    const on=!!r.days[key],s=streak(r);
+    return `<div class="rit"><button class="tick ${on?'on':''}" data-act="rit" data-id="${esc(r.id)}">${on?'\u2713':''}</button>
+      <div class="t">${esc(r.text)}<div class="meta">${s>0?'\uD83D\uDD25 '+s+'-day streak':'Start today'}</div></div>
+      <button class="small ghost" data-act="rit-del" data-id="${esc(r.id)}">\u2715</button></div>`;
+  }).join('');
+  return `<h1>Today \u2728</h1><p class="sub">${esc(new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))}</p>
+    <div class="card"><span class="meta">${ps}</span></div>
+    <div class="card"><h2>Conversation starter</h2><p class="big">${esc(prompt)}</p>
+      <p class="meta">Aaj raat ek dusre se poochein. Jawab Notes mein save kar sakte hain.</p></div>
+    <div class="card"><h2>Mini challenge</h2><p class="big">${esc(ch)}</p>
+      <div class="row between"><span class="meta">${total} completed so far</span>
+      <button data-act="toggle-challenge" class="${done?'ghost':''}">${done?'Done \u2713 (undo)':'Mark done'}</button></div></div>
+    <div class="card"><h2>Our rituals</h2>${rits||'<p class="meta">No rituals yet.</p>'}
+      <form data-form="ritual" class="row" style="margin-top:10px;flex-wrap:nowrap"><input name="text" placeholder="Add a daily ritual" maxlength="100" required><button type="submit">Add</button></form></div>`;
+}
+
+function netBarHtml(){
+  let cls='',txt;
+  if(net.status==='connected'){cls='on';txt='Connected with '+pname()+' \uD83D\uDC9E';}
+  else if(net.status==='waiting'){cls='wait';txt='Room open. Partner ka intezaar...';}
+  else if(net.status==='connecting'){cls='wait';txt='Connecting...';}
+  else txt='Not connected';
+  let h=`<div class="netbar"><span class="dot ${cls}"></span><span>${esc(txt)}</span></div>`;
+  if(net.err)h+=`<div class="msg err">${esc(net.err)}</div>`;
+  if(connected())h+=`<div class="pings">${PINGS.map(e=>`<button data-act="ping" data-e="${e}">${e}</button>`).join('')}</div>`;
+  return h;
+}
+function tgTabsHtml(){
+  return `<div class="seg"><button data-tsub="chat" class="${state.tsub==='chat'?'on':''}">\uD83D\uDCAC Chat</button><button data-tsub="games" class="${state.tsub==='games'?'on':''}">\uD83C\uDFAE Games</button></div>`;
+}
+function connectPanel(){
+  if(net.status==='connected')return `<div class="card"><div class="row between"><span class="meta">Room ${esc(formatCode(net.code))}</span><button class="small ghost" data-act="disconnect">Disconnect</button></div></div>`;
+  if(net.status==='waiting'||net.status==='connecting'){
+    return `<div class="card"><h2>Room code</h2><div class="code">${esc(formatCode(net.code))}</div>
+      <p class="meta" style="text-align:center">Ye code sirf apne partner ko bhejein. Wo Together tab mein yahi code daal kar Connect karein.</p>
+      <div class="row" style="justify-content:center"><button data-act="copy">Copy</button><button class="ghost" data-act="share">Share link</button><button class="ghost" data-act="disconnect">Cancel</button></div></div>`;
+  }
+  const code=state.roomHint||state.data.room||'';
+  return `<div class="card"><h2>Connect with your partner</h2>
+    <form id="f-connect"><label>Your name</label><input name="me" value="${esc(state.data.me||'')}" maxlength="30" required>
+    <label>Room code</label><input name="code" value="${esc(formatCode(code))}" maxlength="20" autocapitalize="characters" autocomplete="off" required>
+    <div class="row" style="margin-top:10px"><button type="submit">Connect</button><button type="button" class="ghost" data-act="gen">New code</button></div>
+    <p class="meta">Ek banda "New code" bana kar partner ko bheje. Dusra wahi code daal kar Connect kare. Dono ka app ek saath khula hona chahiye.</p></form></div>`;
+}
+function chatHtml(){
+  const ok=connected();
+  return connectPanel()+`<div class="card"><div id="chatlist" class="chat">${state.data.chat.map(bubble).join('')}</div>
+    <form id="f-chat" class="row" style="margin-top:10px;flex-wrap:nowrap"><input id="chat-in" value="${esc(state.chatDraft)}" placeholder="${ok?'Type a message':'Connect karne par message bhej sakte hain'}" autocomplete="off" maxlength="2000"><button type="submit" ${ok?'':'disabled'}>Send</button></form></div>`;
+}
+function gamesHtml(){
+  if(!connected())return connectPanel()+'<div class="card"><p class="meta">Games ke liye pehle partner se connect karein.</p></div>';
+  if(state.game)return gameScreen();
+  return `<div class="grid">${GAMES.map(x=>`<button class="gcard" data-act="g-open" data-g="${x.id}"><span class="em">${x.emoji}</span><b>${esc(x.title)}</b><small>${esc(x.desc)}</small></button>`).join('')}</div>`;
+}
+function tgContent(){return state.tsub==='games'?gamesHtml():chatHtml();}
+function togetherView(){
+  return `<h1>Together \uD83D\uDC9E</h1><div id="netbar">${netBarHtml()}</div><div id="tgtabs">${tgTabsHtml()}</div><div id="tgcontent">${tgContent()}</div>`;
+}
+function updateContent(){const c=$('tgcontent');if(c){c.innerHTML=tgContent();scrollChat();}}
+function netChanged(){
+  if(!state.key)return;
+  if(state.tab==='together'){
+    const a=$('netbar');if(a)a.innerHTML=netBarHtml();
+    const b=$('tgtabs');if(b)b.innerHTML=tgTabsHtml();
+    updateContent();
+  }else if(state.tab==='today')render();
+}
+
+function gameScreen(){
+  const g=state.game;let body;
+  if(g.id==='ttt')body=tttHtml(g);
+  else if(g.id==='c4')body=c4Html(g);
+  else if(g.id==='tod')body=todHtml(g);
+  else body=deckHtml(g);
+  return `<div class="row between" style="margin-bottom:6px"><button class="small ghost" data-act="g-close">\u2190 Games</button><span class="meta">${esc(GTITLE[g.id]||'')}</span></div>${body}`;
+}
+function tttHtml(g){
+  const mine=net.role==='host'?'X':'O';
+  let st;
+  if(g.winner==='draw')st='Draw \uD83E\uDD1D';
+  else if(g.winner)st=g.winner===mine?'You win \uD83C\uDF89':esc(pname())+' wins';
+  else st=g.turn===mine?'Your turn ('+mine+')':esc(pname())+"'s turn";
+  return `<div class="card" style="text-align:center"><p class="big">${st}</p>
+    <div class="board">${g.board.map((c,i)=>`<button class="cell" data-act="ttt" data-i="${i}">${c}</button>`).join('')}</div>
+    <p class="meta">${esc(nameOf('host'))} (X): ${g.wins.X} \u00B7 ${esc(nameOf('guest'))} (O): ${g.wins.O}</p>
+    ${g.winner?'<button data-act="g-again">Play again</button>':''}</div>`;
+}
+function c4Html(g){
+  const mine=net.role==='host'?'R':'Y';
+  let st;
+  if(g.winner==='draw')st='Draw \uD83E\uDD1D';
+  else if(g.winner)st=g.winner===mine?'You win \uD83C\uDF89':esc(pname())+' wins';
+  else st=g.turn===mine?'Your turn':esc(pname())+"'s turn";
+  return `<div class="card" style="text-align:center"><p class="big">${st}</p><p class="meta">You are ${mine==='R'?'red \uD83D\uDD34':'yellow \uD83D\uDFE1'}</p>
+    <div class="c4">${g.grid.map((c,i)=>`<button class="c4cell ${c}" data-act="c4" data-c="${i%7}"></button>`).join('')}</div>
+    <p class="meta">${esc(nameOf('host'))}: ${g.wins.R} \u00B7 ${esc(nameOf('guest'))}: ${g.wins.Y}</p>
+    ${g.winner?'<button data-act="g-again">Play again</button>':''}</div>`;
+}
+function todHtml(g){
+  let card='<p class="meta">Truth ya Dare chunein.</p>';
+  if(g.kind)card=`<p class="meta">${g.kind==='truth'?'TRUTH':'DARE'}</p><p class="big">${esc((g.kind==='truth'?TRUTHS:DARES)[g.i])}</p>`;
+  return `<div class="card" style="text-align:center">${card}<div class="row" style="justify-content:center;margin-top:10px">
+    <button data-act="tod" data-k="truth">Truth</button><button data-act="tod" data-k="dare">Dare</button></div></div>`;
+}
+function ansLabel(id,v,opts){
+  if(id==='yom')return esc(nameOf(v));
+  if(id==='deep')return esc(v);
+  if(id==='guess')return `Picked <b>${esc(opts[v.own])}</b> \u00B7 guessed <b>${esc(opts[v.guess])}</b>`;
+  return esc(opts[v]);
+}
+function deckHtml(g){
+  const dk=DECKS[g.id],card=dk.cards[g.order[g.pos]],me=net.role,ot=otherRole();
+  const mine=g.ans[me],theirs=g.ans[ot],reveal=mine!==null&&theirs!==null;
+  let opts=null,q='';
+  if(g.id==='tt'||g.id==='guess'){opts=[card[0],card[1]];q='This or that?';}
+  else if(g.id==='nhie'){opts=['I have','Never'];q='Never have I ever '+card;}
+  else q=card;
+  let h=`<div class="card"><div class="meta">Card ${g.pos+1} of ${g.order.length}`;
+  if(g.id==='guess')h+=` \u00B7 Score: ${esc(nameOf('host'))} ${g.score.host} \u2013 ${g.score.guest} ${esc(nameOf('guest'))}`;
+  h+=`</div><p class="big">${esc(q)}</p>`;
+  if(reveal){
+    h+=[me,ot].map(r=>`<div class="entry"><div class="meta">${esc(nameOf(r))}</div><p>${ansLabel(g.id,g.ans[r],opts)}</p></div>`).join('');
+    let note='';
+    if(g.id==='guess'){
+      note=`${esc(myName())} guessed ${mine.guess===theirs.own?'right \u2713':'wrong \u2717'} \u00B7 ${esc(pname())} guessed ${theirs.guess===mine.own?'right \u2713':'wrong \u2717'}`;
+    }else if(g.id==='yom'){note=mine===theirs?'You agree \uD83D\uDC9E':'Different answers \uD83D\uDE04';}
+    else if(g.id!=='deep'){note=mine===theirs?'Same answer \uD83D\uDC9E':'Different answers \uD83D\uDE04';}
+    if(note)h+=`<p class="meta">${note}</p>`;
+    h+='<button data-act="g-next">Next card \u2192</button>';
+  }else if(mine!==null){
+    h+=`<p class="meta">Aapka jawab lock ho gaya. ${esc(pname())} ka intezaar...</p>`;
+  }else{
+    if(theirs!==null)h+=`<p class="meta">${esc(pname())} ne jawab de diya \u2713</p>`;
+    if(g.id==='tt'||g.id==='nhie'){
+      h+=opts.map((o,i)=>`<button class="opt" data-act="ans" data-v="${i}">${esc(o)}</button>`).join('');
+    }else if(g.id==='yom'){
+      h+=`<button class="opt" data-act="ans" data-v="me">Me</button><button class="opt" data-act="ans" data-v="you">${esc(pname())}</button>`;
+    }else if(g.id==='guess'){
+      if(state.gtmp===null){
+        h+='<p class="meta">Step 1: Aapki pasand</p>'+opts.map((o,i)=>`<button class="opt" data-act="ans" data-v="${i}">${esc(o)}</button>`).join('');
+      }else{
+        h+=`<p class="meta">Step 2: ${esc(pname())} kya chunega?</p>`+opts.map((o,i)=>`<button class="opt" data-act="ans" data-v="${i}">${esc(o)}</button>`).join('');
+      }
+    }else{
+      h+=`<form id="f-deep"><textarea id="deep-in" placeholder="Apna jawab likhein..." maxlength="500" required>${esc(state.draft)}</textarea><div style="margin-top:8px"><button type="submit">Lock my answer</button></div></form>`;
+    }
+  }
+  return h+'</div>';
+}
+
+function collectionView(name){
+  const c=COLLECTIONS[name],list=state.data[name].slice().sort((a,b)=>b.ts-a.ts);
+  let h=`<p class="sub">${esc(c.hint)}</p><div class="card"><form data-form="${name}"><textarea name="text" placeholder="${esc(c.ph)}" required maxlength="5000"></textarea>`;
+  if(c.date)h+='<label>Date of the memory (optional)</label><input type="date" name="when">';
+  h+='<div class="row" style="margin-top:10px"><button type="submit">Add</button></div></form></div><div class="card">';
+  if(!list.length)h+='<p class="meta">Nothing here yet. Add your first one above.</p>';
+  list.forEach(e=>{
+    h+=`<div class="entry${e.done?' done':''}"><p>${esc(e.text)}</p><div class="row between"><span class="meta">${esc(e.when?fmt(e.when+'T00:00:00'):fmt(e.ts))}</span><span class="row">`;
+    if(c.check)h+=`<button class="small ghost" data-act="tick" data-col="${name}" data-id="${esc(e.id)}">${e.done?'Undo':'Done'}</button>`;
+    h+=`<button class="small ghost" data-act="del" data-col="${name}" data-id="${esc(e.id)}">Delete</button></span></div></div>`;
+  });
+  return h+'</div>';
+}
+function journalView(){
+  return `<h1>Journal \uD83D\uDCD6</h1><div class="seg">${['notes','memories','gratitude','plans'].map(s=>`<button data-jsub="${s}" class="${state.jsub===s?'on':''}">${COLLECTIONS[s].title}</button>`).join('')}</div>`+collectionView(state.jsub);
+}
+function vaultView(){
+  return `<h1>Vault \uD83D\uDD12</h1><p class="sub">Backup, restore aur security.</p>${msgHtml()}
+    <div class="card"><h2>Encrypted backup</h2><p class="meta">Ek file download hoti hai jo sirf aapke passphrase se khulti hai. Data sirf is browser mein hai, isliye backup zaroor rakhein.</p><button data-act="export">Download backup</button></div>
+    <div class="card"><h2>Restore backup</h2><p class="meta">Is device ka data replace ho jayega. Backup ka passphrase poocha jayega.</p><input type="file" id="f-import" accept="application/json,.json"></div>
+    <div class="card"><h2>Change passphrase</h2><form id="f-change"><label for="np1">New passphrase</label><input id="np1" type="password" minlength="8" autocomplete="new-password" required>
+      <label for="np2">Repeat</label><input id="np2" type="password" minlength="8" autocomplete="new-password" required>
+      <div class="row" style="margin-top:10px"><button type="submit">Change</button></div></form></div>
+    <div class="card"><div class="row"><button class="ghost" data-act="clear-chat">Clear chat history</button><button class="ghost" data-act="lock">Lock now</button></div></div>`;
+}
+function render(){
+  if(!state.key){lockView();return;}
+  let h;
+  if(state.tab==='today')h=todayView();
+  else if(state.tab==='together')h=togetherView();
+  else if(state.tab==='journal')h=journalView();
+  else h=vaultView();
+  $('app').innerHTML=h;
+  const nav=$('nav');nav.classList.remove('hidden');
+  nav.innerHTML=TABS.map(x=>`<button data-tab="${x[0]}" class="${x[0]===state.tab?'on':''}"><span>${x[1]}</span>${x[2]}</button>`).join('');
+  state.msg=null;
+  if(state.tab==='together'){
+    scrollChat();
+    if(!net.autoTried&&net.status==='idle'&&state.data.room&&!state.roomHint){net.autoTried=true;netConnect(state.data.room);}
+  }
+}
+
+// ---------- events ----------
+async function handleSubmit(e){
+  const f=e.target;
+  if(f.id==='f-create'){
+    e.preventDefault();
+    const p1=$('p1').value,p2=$('p2').value;
+    if(p1!==p2){setMsg('Passphrases match nahi karte.');lockView();return;}
+    $('b-create').disabled=true;$('b-create').textContent='Creating...';
+    try{await createVault(p1);state.tab='today';render();}catch(err){setMsg('Vault nahi bana: '+err.message);lockView();}
+  }else if(f.id==='f-unlock'){
+    e.preventDefault();
+    $('b-unlock').disabled=true;$('b-unlock').textContent='Unlocking...';
+    try{
+      const r=await decryptRecord(getRecord(),$('p1').value);
+      state.key=r.key;state.salt=r.salt;state.iter=r.iter;state.data=r.data;state.tab='today';render();
+    }catch(err){setMsg('Galat passphrase ya data kharab hai.');lockView();}
+  }else if(f.id==='f-change'){
+    e.preventDefault();
+    const a=$('np1').value,b=$('np2').value;
+    if(a!==b){setMsg('New passphrases match nahi karte.');render();return;}
+    try{
+      state.salt=crypto.getRandomValues(new Uint8Array(16));state.iter=ITER;
+      state.key=await deriveKey(a,state.salt,state.iter);await persist();setMsg('Passphrase change ho gaya.','ok');
+    }catch(err){setMsg('Passphrase change nahi hua.');}
+    render();
+  }else if(f.id==='f-connect'){
+    e.preventDefault();
+    state.data.me=cleanName(f.elements.me.value);
+    state.roomHint='';
+    net.autoTried=true;
+    await persist();
+    netConnect(f.elements.code.value);
+  }else if(f.id==='f-chat'){
+    e.preventDefault();
+    const inp=$('chat-in'),txt=inp.value.trim();
+    if(!txt||!connected())return;
+    sendMsg({t:'chat',text:txt});
+    addChat('me',txt);
+    inp.value='';state.chatDraft='';
+  }else if(f.id==='f-deep'){
+    e.preventDefault();
+    const v=$('deep-in').value.trim();
+    if(v){state.draft='';answer(v.slice(0,500));}
+  }else if(f.dataset.form==='ritual'){
+    e.preventDefault();
+    const t=f.elements.text.value.trim();
+    if(t){state.data.rituals.push({id:uid(),text:t,days:{}});await persist();render();}
+  }else if(f.dataset.form&&COLLECTIONS[f.dataset.form]){
+    e.preventDefault();
+    const name=f.dataset.form,text=f.elements.text.value.trim();
+    if(!text)return;
+    const entry={id:uid(),text:text,ts:Date.now()};
+    if(f.elements.when&&f.elements.when.value)entry.when=f.elements.when.value;
+    if(COLLECTIONS[name].check)entry.done=false;
+    state.data[name].push(entry);
+    await persist();render();
+  }
+}
+
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('Copied'),()=>toast('Copy nahi hua'));
+  else toast('Copy nahi hua, code khud likh lein');
+}
+
+async function handleClick(e){
+  const t=e.target;
+  const tb=t.closest('[data-tab]');
+  if(tb){state.tab=tb.dataset.tab;render();window.scrollTo(0,0);return;}
+  const js=t.closest('[data-jsub]');
+  if(js){state.jsub=js.dataset.jsub;render();return;}
+  const ts=t.closest('[data-tsub]');
+  if(ts){state.tsub=ts.dataset.tsub;$('tgtabs').innerHTML=tgTabsHtml();updateContent();return;}
+  if(t.id==='a-reset'){
+    e.preventDefault();
+    if(confirm('Is device ka vault permanently erase hoga. Continue?')){localStorage.removeItem(LS_KEY);setMsg(null);render();}
+    return;
+  }
+  const b=t.closest('[data-act]');
+  if(!b)return;
+  const act=b.dataset.act,d=state.data;
+  if(act==='lock')lock();
+  else if(act==='toggle-challenge'){const k=todayKey();if(d.done[k])delete d.done[k];else d.done[k]=true;await persist();render();}
+  else if(act==='rit'){d.rituals.forEach(r=>{if(r.id===b.dataset.id){const k=todayKey();if(r.days[k])delete r.days[k];else r.days[k]=true;}});await persist();render();}
+  else if(act==='rit-del'){if(confirm('Ye ritual delete karein?')){d.rituals=d.rituals.filter(r=>r.id!==b.dataset.id);await persist();render();}}
+  else if(act==='del'){if(!confirm('Delete this entry?'))return;const c=b.dataset.col;d[c]=d[c].filter(x=>x.id!==b.dataset.id);await persist();render();}
+  else if(act==='tick'){d[b.dataset.col].forEach(x=>{if(x.id===b.dataset.id)x.done=!x.done;});await persist();render();}
+  else if(act==='export'){
+    const rec=localStorage.getItem(LS_KEY);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([rec],{type:'application/json'}));
+    a.download='humtum-backup-'+todayKey()+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  }
+  else if(act==='clear-chat'){if(confirm('Saari chat history is device se delete karein?')){d.chat=[];await persist();setMsg('Chat clear ho gayi.','ok');render();}}
+  else if(act==='gen'){const el=document.querySelector('#f-connect [name=code]');if(el)el.value=formatCode(genCode());}
+  else if(act==='disconnect'){netClose();net.partnerName='';net.autoTried=true;netChanged();}
+  else if(act==='copy')copyText(formatCode(net.code));
+  else if(act==='share'){
+    const link=location.href.split('#')[0]+'#room='+net.code;
+    if(navigator.share)navigator.share({title:'Hum Tum',text:'Hum Tum room code: '+formatCode(net.code),url:link}).catch(()=>{});
+    else copyText(link);
+  }
+  else if(act==='ping'){const em=PINGS.indexOf(b.dataset.e)>-1?b.dataset.e:PINGS[0];sendMsg({t:'ping',e:em});toast('Sent '+em);}
+  else if(act==='g-open')startGame(b.dataset.g);
+  else if(act==='g-close'){state.game=null;state.gtmp=null;sendMsg({t:'gc'});gameChanged();}
+  else if(act==='ttt')tttMove(parseInt(b.dataset.i,10));
+  else if(act==='c4')c4Drop(parseInt(b.dataset.c,10));
+  else if(act==='g-again'){if(state.game&&state.game.id==='ttt')tttAgain();else c4Again();}
+  else if(act==='tod'){
+    const k=b.dataset.k==='dare'?'dare':'truth';
+    setGame({id:'tod',kind:k,i:Math.floor(Math.random()*(k==='dare'?DARES.length:TRUTHS.length))});
+  }
+  else if(act==='ans'){
+    const g=state.game;if(!g||!DECKS[g.id])return;
+    const type=DECKS[g.id].type,v=b.dataset.v;
+    if(type==='choice')answer(parseInt(v,10));
+    else if(type==='yom')answer(v==='me'?net.role:otherRole());
+    else if(type==='guess'){
+      if(state.gtmp===null){state.gtmp=parseInt(v,10);gameChanged();}
+      else{const own=state.gtmp;state.gtmp=null;answer({own:own,guess:parseInt(v,10)});}
+    }
+  }
+  else if(act==='g-next'){
+    const g=state.game;
+    if(g&&DECKS[g.id]&&g.ans.host!==null&&g.ans.guest!==null){const p=g.pos;sendMsg({t:'next',pos:p});nextRound();}
+  }
+}
+
+async function handleChange(e){
+  if(e.target.id!=='f-import')return;
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const rec=JSON.parse(await file.text());
+    if(!validRecord(rec))throw new Error('Ye Hum Tum backup file nahi hai.');
+    const pass=prompt('Is backup ka passphrase likhein:');
+    if(!pass){e.target.value='';return;}
+    const r=await decryptRecord(rec,pass);
+    netClose();net.autoTried=false;
+    localStorage.setItem(LS_KEY,JSON.stringify(rec));
+    state.key=r.key;state.salt=r.salt;state.iter=r.iter;state.data=r.data;state.tab='vault';
+    setMsg('Backup restore ho gaya.','ok');render();
+  }catch(err){
+    setMsg(err.message&&err.message.indexOf('backup file')>-1?err.message:'Restore nahi hua: galat passphrase ya kharab file.');
+    if(state.key){state.tab='vault';render();}else lockView();
+  }
+}
+function handleInput(e){
+  if(e.target.id==='chat-in')state.chatDraft=e.target.value;
+  else if(e.target.id==='deep-in')state.draft=e.target.value;
+}
+
+document.addEventListener('submit',handleSubmit);
+document.addEventListener('click',handleClick);
+document.addEventListener('change',handleChange);
+document.addEventListener('input',handleInput);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)state.hid=Date.now();
+  else if(state.key&&state.hid&&Date.now()-state.hid>10*60*1000)lock();
+});
+
+try{const m=/room=([A-Za-z0-9]+)/.exec(location.hash);if(m)state.roomHint=normCode(m[1]);}catch(e){}
+render();
+})();
+</script>
+</body>
+</html>
