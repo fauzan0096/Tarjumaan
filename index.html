@@ -906,7 +906,7 @@ function connectPanel(){
       <div class="row" style="justify-content:center"><button class="small" data-act="wa">WhatsApp par bhejein</button><button class="small ghost" data-act="copy">Copy code</button><button class="small ghost" data-act="retry">Retry</button><button class="small ghost" data-act="disconnect">Disconnect</button></div>
       <p class="meta" style="text-align:center;margin-top:8px">Ye code partner ko do. Wo link khole, ya code daal kar "Code se judo" dabaye.</p></div>`;
   }
-  const code=state.roomHint||state.data.room||'';
+  const code=state.roomHint||'';
   return `<div class="card"><h2>Partner se judo 💞</h2>
     <form id="f-connect"><label>Aapka naam</label><input name="me" value="${esc(state.data.me||'')}" maxlength="30" required>
     ${code?'':'<button type="button" class="opt" data-act="admin">👑 Main Admin hoon — room banao</button><p class="meta" style="text-align:center">Code apne aap banega. Phir WhatsApp par partner ko bhej do.</p><hr style="border:0;border-top:1px solid var(--line)">'}
@@ -925,7 +925,7 @@ function gamesHtml(){
 }
 function tgContent(){return state.tsub==='games'?gamesHtml():chatHtml();}
 function togetherView(){
-  return `<h1>Together 💞</h1><div id="netbar">${netBarHtml()}</div><div id="tgtabs">${tgTabsHtml()}</div><div id="tgcontent">${tgContent()}</div>`;
+  return `<h1>Together 💞 <small class="meta">v3</small></h1><div id="netbar">${netBarHtml()}</div><div id="tgtabs">${tgTabsHtml()}</div><div id="tgcontent">${tgContent()}</div>`;
 }
 function updateContent(){
   const c=$('tgcontent');if(!c)return;
