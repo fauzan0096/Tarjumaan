@@ -902,16 +902,16 @@ function connectPanel(){
   if(N.active()){
     const code=state.data.room||'';
     if(connected())return `<div class="card"><div class="row between"><span class="meta">Code: ${esc(code)}</span><span class="row"><button class="small ghost" data-act="wa">Share</button><button class="small ghost" data-act="disconnect">Disconnect</button></span></div></div>`;
-    return `<div class="card"><div class="meta" style="text-align:center">Aapka room code</div><div class="code">${esc(code)}</div>
+    return `<div class="card"><div class="meta" style="text-align:center">${state.data.admin?'👑 Aap Admin ho · ':''}Aapka room code</div><div class="code">${esc(code)}</div>
       <div class="row" style="justify-content:center"><button class="small" data-act="wa">WhatsApp par bhejein</button><button class="small ghost" data-act="copy">Copy code</button><button class="small ghost" data-act="retry">Retry</button><button class="small ghost" data-act="disconnect">Disconnect</button></div>
-      <p class="meta" style="text-align:center;margin-top:8px">Ye code partner ko do. Wo "Room code" mein yahi daal kar Connect kare, ya aapka bheja link khole.</p></div>`;
+      <p class="meta" style="text-align:center;margin-top:8px">Ye code partner ko do. Wo link khole, ya code daal kar "Code se judo" dabaye.</p></div>`;
   }
   const code=state.roomHint||state.data.room||'';
-  return `<div class="card"><h2>Partner se connect karein</h2>
+  return `<div class="card"><h2>Partner se judo 💞</h2>
     <form id="f-connect"><label>Aapka naam</label><input name="me" value="${esc(state.data.me||'')}" maxlength="30" required>
-    <label>Room code (dono ka same)</label><input name="code" value="${esc(code)}" maxlength="40" autocapitalize="characters" autocomplete="off" required>
-    <div class="row" style="margin-top:10px"><button type="submit">Connect</button><button type="button" class="ghost" data-act="gen">New code</button></div>
-    <p class="meta"><b>Sirf EK banda</b> "New code" dabaye aur WhatsApp par partner ko bheje. Dusra wahi code (ya bheja hua link) use kare. Phir dono Connect dabayein. Dono ki Room ID same dikhni chahiye.</p></form></div>`;
+    ${code?'':'<button type="button" class="opt" data-act="admin">👑 Main Admin hoon — room banao</button><p class="meta" style="text-align:center">Code apne aap banega. Phir WhatsApp par partner ko bhej do.</p><hr style="border:0;border-top:1px solid var(--line)">'}
+    <label>${code?'Partner ka code (link se bhar gaya)':'Partner ne code bheja hai? Yahan daalo'}</label><input name="code" value="${esc(code)}" maxlength="40" autocapitalize="characters" autocomplete="off">
+    <button type="submit" class="opt">Code se judo</button></form></div>`;
 }
 function chatHtml(){
   const ok=connected();
@@ -1119,7 +1119,8 @@ async function handleSubmit(e){
     e.preventDefault();
     const nm=cleanName(f.elements.me.value),code=f.elements.code.value.trim();
     if(!nm){state.netErr='Apna naam likhein.';refreshNet();return;}
-    await startRoom(code,nm);
+    if(!code){state.netErr='Code daalo, ya Admin banke room banao.';refreshNet();return;}
+    state.data.admin=false;await startRoom(code,nm);
   }else if(f.id==='f-chat'){
     e.preventDefault();
     const inp=$('chat-in'),txt=inp.value.trim();
@@ -1204,6 +1205,7 @@ async function handleClick(e){
     setTimeout(()=>URL.revokeObjectURL(a.href),2000);
   }
   else if(act==='clear-chat'){if(confirm('Saari chat history is device se delete karein?')){d.chat=[];await persist();setMsg('Chat clear ho gayi.','ok');render();}}
+  else if(act==='admin'){const f=$('f-connect'),nm=cleanName(f&&f.elements.me.value);if(!nm){state.netErr='Pehle apna naam likhein.';refreshNet();return;}state.data.admin=true;startRoom(genCode(),nm);}
   else if(act==='gen'){const el=document.querySelector('#f-connect [name=code]');if(el)el.value=genCode();}
   else if(act==='disconnect'){N.stop();state.starting=false;state.netErr='';d.auto=false;persist();refreshNet();}
   else if(act==='retry'){N.kick();toast('Dobara try kar raha hoon...');}
